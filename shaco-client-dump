@@ -1,0 +1,28 @@
+#!/bin/bash -e
+
+if [ $# -lt 2 ]; then
+    echo "usage: shaco-client-dump .so .dmp"
+    exit
+fi
+
+sofile=$1
+dmpfile=$2
+symfile=$sofile.sym
+
+if [ ${sofile##*.} != so ]; then
+    echo  "para1 shoud be .so file"
+    exit
+fi
+
+if [ ${dmpfile##*.} != dmp ]; then
+    echo  "para2 shoud be .dmp file"
+    exit
+fi
+
+dump_syms $sofile > $symfile
+no=`head $symfile | awk -F' ' '{print $4}'`
+mkdir -p tmp
+mkdir -p tmp/$sofile 
+mkdir -p tmp/$sofile/$no
+mv -f $symfile tmp/$sofile/$no/
+minidump_stackwalk $dmpfile ./tmp > $sofile.dmp.txt
